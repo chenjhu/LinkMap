@@ -22,10 +22,7 @@
       }
       body {
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", sans-serif;
-        background:
-          radial-gradient(circle at top left, rgba(255,255,255,0.88), transparent 32%),
-          radial-gradient(circle at top right, rgba(230,235,245,0.8), transparent 28%),
-          var(--bg);
+        background: #f6f6f3;
         color: var(--text);
         overflow: hidden;
         letter-spacing: -0.01em;
@@ -35,13 +32,13 @@
         margin: 0;
       }
       .glass {
-        background: var(--surface);
-        backdrop-filter: saturate(150%) blur(24px);
-        -webkit-backdrop-filter: saturate(150%) blur(24px);
-        border: 1px solid rgba(255, 255, 255, 0.45);
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: saturate(140%) blur(22px);
+        -webkit-backdrop-filter: saturate(140%) blur(22px);
+        border: 1px solid rgba(255, 255, 255, 0.52);
       }
       .leaflet-container {
-        background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%) !important;
+        background: #f7f9fc !important;
         border-radius: 34px;
       }
       .leaflet-pane,
@@ -50,10 +47,23 @@
       .leaflet-tooltip {
         transition: all 220ms ease;
       }
+      .leaflet-container:focus,
+      .leaflet-container:focus-visible,
+      .leaflet-interactive:focus,
+      .leaflet-interactive:focus-visible,
+      .leaflet-marker-icon:focus,
+      .leaflet-marker-icon:focus-visible {
+        outline: none !important;
+      }
+      .leaflet-container svg:focus,
+      .leaflet-container path:focus,
+      .leaflet-container g:focus {
+        outline: none !important;
+      }
       .leaflet-control-zoom {
         border: none !important;
         overflow: hidden;
-        box-shadow: 0 10px 30px rgba(16, 24, 40, 0.12) !important;
+        box-shadow: 0 8px 22px rgba(16, 24, 40, 0.10) !important;
         border-radius: 16px !important;
       }
       .leaflet-control-zoom-in, .leaflet-control-zoom-out {
@@ -75,7 +85,7 @@
       }
       @keyframes softPulse {
         0% { transform: scale(1); opacity: 1; }
-        70% { transform: scale(2.15); opacity: 0; }
+        70% { transform: scale(1.7); opacity: 0; }
         100% { transform: scale(1); opacity: 0; }
       }
       .custom-div-icon {
@@ -83,29 +93,32 @@
         border: none;
       }
       .marker-pulse {
-        width: 18px;
-        height: 18px;
-        background: rgba(91, 141, 239, 0.16);
+        width: 12px;
+        height: 12px;
+        background: rgba(91, 141, 239, 0.12);
         border-radius: 50%;
         position: absolute;
-        animation: softPulse 2.8s infinite;
+        animation: softPulse 3s infinite;
       }
       .marker-core {
-        width: 10px;
-        height: 10px;
-        background: linear-gradient(180deg, #7aa6ff 0%, #4d7fe8 100%);
-        border: 2px solid rgba(255,255,255,0.98);
+        width: 6px;
+        height: 6px;
+        background: linear-gradient(180deg, #78a6ff 0%, #5e8be6 100%);
+        border: 1.5px solid rgba(255,255,255,0.98);
         border-radius: 50%;
         position: relative;
         z-index: 2;
-        box-shadow: 0 6px 18px rgba(44, 84, 164, 0.28);
+        box-shadow: 0 0 0 3px rgba(120, 166, 255, 0.10), 0 4px 10px rgba(44, 84, 164, 0.16);
+      }
+      .province-selected {
+        filter: none;
       }
       .apple-tooltip {
         background: rgba(250, 251, 253, 0.94) !important;
         border: 1px solid rgba(255, 255, 255, 0.72) !important;
         border-radius: 14px !important;
         padding: 9px 12px !important;
-        box-shadow: 0 16px 40px rgba(18, 24, 40, 0.12) !important;
+        box-shadow: 0 12px 30px rgba(18, 24, 40, 0.10) !important;
         color: var(--text) !important;
         font-family: inherit;
         backdrop-filter: blur(18px);

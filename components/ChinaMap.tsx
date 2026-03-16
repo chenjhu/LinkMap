@@ -1,23 +1,13 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import { ContactsState } from '../types';
-
-// 主要城市坐标映射数据库
-const CITY_COORDS: Record<string, [number, number]> = {
-  "北京市": [39.9042, 116.4074], "上海市": [31.2304, 121.4737], "天津市": [39.0841, 117.2009], "重庆市": [29.5630, 106.5516],
-  "广州市": [23.1291, 113.2644], "深圳市": [22.5431, 114.0579], "杭州市": [30.2741, 120.1551], "成都市": [30.5728, 104.0668],
-  "武汉市": [30.5928, 114.3055], "南京市": [32.0603, 118.7969], "西安市": [34.3416, 108.9398], "长沙市": [28.2282, 112.9388],
-  "沈阳市": [41.6772, 123.4631], "大连市": [38.9140, 121.6147], "济南市": [36.6512, 117.1201], "青岛市": [36.0671, 120.3826],
-  "福州市": [26.0745, 119.2965], "厦门市": [24.4798, 118.0894], "郑州市": [34.7466, 113.6253], "昆明市": [25.0406, 102.7122],
-  "合肥市": [31.8206, 117.2272], "南昌市": [28.6820, 115.8579], "长春市": [43.8171, 125.3235], "哈尔滨市": [45.8038, 126.5350],
-  "太原市": [37.8706, 112.5489], "石家庄市": [38.0423, 114.5149], "南宁市": [22.8170, 108.3665], "贵阳市": [26.5982, 106.7072],
-  "兰州市": [36.0611, 103.8343], "乌鲁木齐市": [43.8256, 87.6177], "呼和浩特市": [40.8423, 111.7487], "海口市": [20.0174, 110.3492],
-  "银川市": [38.4872, 106.2309], "西宁市": [36.6171, 101.7782], "拉萨市": [29.6441, 91.1145], "香港岛": [22.2800, 114.1700],
-  "九龙": [22.3200, 114.1700], "新界": [22.4000, 114.1500], "澳门半岛": [22.1900, 113.5400], "台北市": [25.0330, 121.5654],
-  "苏州市": [31.2989, 120.5853], "无锡市": [31.4912, 120.3119], "东莞市": [23.0205, 113.7518], "佛山市": [23.0215, 113.1214],
-  "宁波市": [29.8603, 121.5440], "温州市": [27.9943, 120.6993], "烟台市": [37.4638, 121.4479], "无锡": [31.49, 120.31]
-};
+import {
+  buildCityMarkerGroups,
+  CityCoordinate,
+  getCityCoordinateSync,
+  resolveCityCoordinate,
+} from '../utils/cityCoordinates';
 
 interface ChinaMapProps {
   onProvinceSelect: (id: string) => void;
@@ -29,8 +19,12 @@ export const ChinaMap: React.FC<ChinaMapProps> = ({ onProvinceSelect, selectedPr
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
+  const selectedProvinceLayerRef = useRef<L.GeoJSON | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
   const [geoData, setGeoData] = useState<any>(null);
+  const [resolvedCoordinates, setResolvedCoordinates] = useState<Record<string, CityCoordinate>>({});
+
+  const cityMarkerGroups = useMemo(() => buildCityMarkerGroups(contacts), [contacts]);
 
   // 初始化地图
   useEffect(() => {
@@ -49,7 +43,7 @@ export const ChinaMap: React.FC<ChinaMapProps> = ({ onProvinceSelect, selectedPr
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
       subdomains: 'abcd',
       maxZoom: 20,
-      opacity: 0.5
+      opacity: 0.36
     }).addTo(map);
 
     mapInstanceRef.current = map;
@@ -93,6 +87,61 @@ export const ChinaMap: React.FC<ChinaMapProps> = ({ onProvinceSelect, selectedPr
     }
   }, [selectedProvince]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const nextResolved: Record<string, CityCoordinate> = {};
+    const unresolved = cityMarkerGroups.filter((group) => {
+      const cached = getCityCoordinateSync(group.province, group.city);
+      if (cached) {
+        nextResolved[group.key] = cached;
+        return false;
+      }
+      return true;
+    });
+
+    if (Object.keys(nextResolved).length > 0) {
+      setResolvedCoordinates((prev) => {
+        const merged = { ...prev };
+        let changed = false;
+
+        Object.entries(nextResolved).forEach(([key, value]) => {
+          if (!merged[key]) {
+            merged[key] = value;
+            changed = true;
+          }
+        });
+
+        return changed ? merged : prev;
+      });
+    }
+
+    if (unresolved.length === 0) return;
+
+    Promise.all(
+      unresolved.map(async (group) => {
+        const coordinate = await resolveCityCoordinate(group.province, group.city);
+        return [group.key, coordinate] as const;
+      })
+    ).then((results) => {
+      if (cancelled) return;
+
+      const resolvedEntries = results.reduce<Record<string, CityCoordinate>>((acc, [key, coordinate]) => {
+        if (coordinate) {
+          acc[key] = coordinate;
+        }
+        return acc;
+      }, {});
+
+      if (Object.keys(resolvedEntries).length > 0) {
+        setResolvedCoordinates((prev) => ({ ...prev, ...resolvedEntries }));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cityMarkerGroups]);
+
   // 渲染地级市脉冲标记和省份样式
   useEffect(() => {
     if (!mapInstanceRef.current || !geoData) return;
@@ -100,22 +149,26 @@ export const ChinaMap: React.FC<ChinaMapProps> = ({ onProvinceSelect, selectedPr
     if (geoJsonLayerRef.current) {
       mapInstanceRef.current.removeLayer(geoJsonLayerRef.current);
     }
+    if (selectedProvinceLayerRef.current) {
+      mapInstanceRef.current.removeLayer(selectedProvinceLayerRef.current);
+    }
     if (markersLayerRef.current) {
       markersLayerRef.current.clearLayers();
     }
 
     const style = (feature: any) => {
       const name = feature.properties.name;
-      const isSelected = name === selectedProvince;
       const provinceContacts = contacts[name] || [];
       const hasContacts = provinceContacts.length > 0;
 
       return {
-        fillColor: isSelected ? '#79a1ff' : (hasContacts ? '#dfe9ff' : '#f8f9fb'),
-        weight: isSelected ? 1.8 : 1,
+        fillColor: hasContacts ? '#e7efff' : '#f5f7fb',
+        weight: 1,
         opacity: 1,
-        color: isSelected ? '#f8fbff' : '#cfd6e2',
-        fillOpacity: isSelected ? 0.92 : (hasContacts ? 0.86 : 0.96)
+        color: '#d2d9e4',
+        fillOpacity: hasContacts ? 0.9 : 0.98,
+        lineCap: 'round' as const,
+        lineJoin: 'round' as const,
       };
     };
 
@@ -135,7 +188,13 @@ export const ChinaMap: React.FC<ChinaMapProps> = ({ onProvinceSelect, selectedPr
         mouseover: (e) => {
           const l = e.target;
           if (l.feature.properties.name !== selectedProvince) {
-            l.setStyle({ fillColor: '#edf3ff', color: '#b9c9ea', fillOpacity: 1 });
+            l.setStyle({
+              fillColor: '#edf3ff',
+              color: '#bfcce3',
+              fillOpacity: 1,
+              lineCap: 'round',
+              lineJoin: 'round',
+            });
           }
         },
         mouseout: (e) => {
@@ -153,43 +212,54 @@ export const ChinaMap: React.FC<ChinaMapProps> = ({ onProvinceSelect, selectedPr
       onEachFeature
     }).addTo(mapInstanceRef.current);
 
-    // 绘制所有联系人的城市脉冲点
-    Object.entries(contacts).forEach(([province, list]) => {
-      const cityGroups = new Map<string, number>();
-      list.forEach(c => {
-        if (c.city) cityGroups.set(c.city, (cityGroups.get(c.city) || 0) + 1);
+    if (selectedProvince) {
+      const selectedFeature = geoData.features.find((feature: any) => feature.properties.name === selectedProvince);
+      if (selectedFeature) {
+        selectedProvinceLayerRef.current = L.geoJSON(selectedFeature, {
+          interactive: false,
+          style: {
+            fillColor: '#eef4ff',
+            fillOpacity: 0.72,
+            color: '#7f9fd9',
+            opacity: 0.98,
+            weight: 1.6,
+            lineCap: 'round',
+            lineJoin: 'round',
+          },
+        }).addTo(mapInstanceRef.current);
+        selectedProvinceLayerRef.current.bringToFront();
+      }
+    }
+
+    cityMarkerGroups.forEach((group) => {
+      const coords = resolvedCoordinates[group.key] || getCityCoordinateSync(group.province, group.city);
+      if (!coords || !markersLayerRef.current) return;
+
+      const customIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div class="flex items-center justify-center">
+                <div class="marker-pulse"></div>
+                <div class="marker-core"></div>
+               </div>`,
+        iconSize: [12, 12],
+        iconAnchor: [6, 6]
       });
 
-      cityGroups.forEach((count, cityName) => {
-        const coords = CITY_COORDS[cityName];
-        if (coords && markersLayerRef.current) {
-          const customIcon = L.divIcon({
-            className: 'custom-div-icon',
-            html: `<div class="flex items-center justify-center">
-                    <div class="marker-pulse"></div>
-                    <div class="marker-core"></div>
-                   </div>`,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
-          });
-
-          L.marker(coords, { icon: customIcon })
-            .bindTooltip(`
-              <div class="px-1">
-                <div class="text-[9px] font-semibold text-[#8a9099] uppercase tracking-[0.18em] mb-1">${cityName}</div>
-                <div class="text-xs font-semibold text-[#1f2329]">${count} 位联络人</div>
-              </div>
-            `, { className: 'apple-tooltip', direction: 'top', offset: [0, -5] })
-            .on('click', (e) => {
-              L.DomEvent.stopPropagation(e);
-              onProvinceSelect(province);
-            })
-            .addTo(markersLayerRef.current);
-        }
-      });
+      L.marker(coords, { icon: customIcon })
+        .bindTooltip(`
+          <div class="px-1">
+            <div class="text-[9px] font-semibold text-[#8a9099] uppercase tracking-[0.18em] mb-1">${group.city}</div>
+            <div class="text-xs font-semibold text-[#1f2329]">${group.count} 位联络人</div>
+          </div>
+        `, { className: 'apple-tooltip', direction: 'top', offset: [0, -5] })
+        .on('click', (e) => {
+          L.DomEvent.stopPropagation(e);
+          onProvinceSelect(group.province);
+        })
+        .addTo(markersLayerRef.current);
     });
 
-  }, [geoData, selectedProvince, contacts, onProvinceSelect]);
+  }, [cityMarkerGroups, geoData, onProvinceSelect, resolvedCoordinates, selectedProvince, contacts]);
 
   // 当侧边栏出现或消失时，触发地图重新计算大小
   useEffect(() => {
@@ -204,10 +274,7 @@ export const ChinaMap: React.FC<ChinaMapProps> = ({ onProvinceSelect, selectedPr
   return (
     <div className="w-full h-full relative group">
       <div ref={mapContainerRef} className="w-full h-full z-10" />
-      <div className="absolute inset-0 pointer-events-none rounded-[32px] border border-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),inset_0_0_120px_rgba(255,255,255,0.18)] z-20"></div>
-      <div className="absolute left-5 top-5 z-20 pointer-events-none rounded-full border border-white/80 bg-white/72 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8a9099] backdrop-blur-md shadow-[0_14px_30px_rgba(18,24,40,0.08)]">
-        Province Coverage
-      </div>
+      <div className="absolute inset-0 pointer-events-none rounded-[26px] border border-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.92),inset_0_0_90px_rgba(255,255,255,0.10)] z-20"></div>
     </div>
   );
 };

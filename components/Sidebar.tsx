@@ -77,56 +77,53 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setIsAdding(false);
   };
 
-  const isVisible = !!provinceId;
-
   return (
-    <aside 
-      className={`
-        fixed top-0 right-0 h-full z-40
-        w-full md:w-[430px]
-        transition-transform duration-500 ease-out
-        ${isVisible ? 'translate-x-0' : 'translate-x-full'}
-      `}
-    >
-      {isVisible && (
-        <div className="flex h-full flex-col border-l border-white/60 bg-[rgba(248,249,251,0.78)] shadow-[-24px_0_60px_rgba(18,24,40,0.12)] backdrop-blur-[26px]">
-          <div className="px-6 pb-5 pt-6 md:px-8 md:pb-6 md:pt-8 border-b border-black/5 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-11 h-11 bg-[#5b8def] rounded-[16px] flex items-center justify-center text-white shadow-[0_16px_30px_rgba(91,141,239,0.28)]">
-                <MapPin className="w-5 h-5" />
-              </div>
+    <aside className="ml-4 flex h-full w-[400px] shrink-0 flex-col overflow-hidden rounded-[30px] border border-white/65 bg-[rgba(248,249,251,0.84)] shadow-[0_24px_60px_rgba(15,23,42,0.10)] backdrop-blur-xl">
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="border-b border-black/5 px-6 pb-5 pt-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <MapPin className="h-5 w-5 text-[#c1c7d0]" />
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#8a9099]">Province</div>
-                <h2 className="text-[28px] leading-none font-semibold tracking-[-0.04em] text-[#1f2329] mt-1">{provinceId}</h2>
+                <h2 className="text-[28px] leading-none font-semibold tracking-[-0.04em] text-[#1f2329]">
+                  {provinceId || '选择省份'}
+                </h2>
               </div>
             </div>
-            <button onClick={onClose} className="p-2.5 hover:bg-white/80 rounded-full transition-colors duration-200">
-              <X className="w-5 h-5 text-[#8a9099]" />
-            </button>
+            {provinceId ? (
+              <button onClick={onClose} className="rounded-full p-2.5 text-[#8a9099] transition-colors duration-200 hover:bg-white/80">
+                <X className="w-5 h-5" />
+              </button>
+            ) : null}
           </div>
+          <p className="mt-4 text-sm leading-6 text-[#70757f]">
+            {provinceId ? '在这里添加、浏览和管理当前省份的联系人。' : '从左侧地图或顶部快速跳转中选择一个省份，即可开始记录联络人。'}
+          </p>
+        </div>
 
-          <div className="px-6 py-6 md:px-8 overflow-y-auto flex-1 space-y-8">
-            <section>
-              {isAdding ? (
-                <form onSubmit={handleSubmit} className="p-6 bg-white/78 rounded-[28px] border border-white/75 shadow-[0_18px_40px_rgba(18,24,40,0.08)] space-y-4">
+        <div className="flex min-h-0 flex-1 flex-col px-6 py-5">
+          <section>
+            {provinceId ? (
+              isAdding ? (
+                <form onSubmit={handleSubmit} className="space-y-4 rounded-[26px] border border-white/75 bg-white/78 p-5 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-semibold text-[#8a9099] uppercase tracking-[0.18em] ml-1">联络人姓名</label>
-                    <input 
+                    <label className="ml-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8a9099]">联络人姓名</label>
+                    <input
                       autoFocus
                       placeholder="例如：王经理"
                       value={name}
                       onChange={e => setName(e.target.value)}
-                      className="w-full px-4 py-3.5 bg-[#f4f5f7] rounded-[18px] border border-black/5 outline-none focus:border-[#8cabf2] focus:ring-4 focus:ring-[#8cabf2]/15 transition-all text-sm text-[#1f2329]"
+                      className="w-full rounded-[18px] border border-black/5 bg-[#f4f5f7] px-4 py-3.5 text-sm text-[#1f2329] outline-none transition-all focus:border-[#8cabf2] focus:ring-4 focus:ring-[#8cabf2]/15"
                     />
                   </div>
-                  
+
                   <div className="space-y-1">
-                    <label className="text-[10px] font-semibold text-[#8a9099] uppercase tracking-[0.18em] ml-1">所在城市</label>
-                    <div className="relative group">
-                      <select 
+                    <label className="ml-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8a9099]">所在城市</label>
+                    <div className="group relative">
+                      <select
                         value={city}
                         onChange={e => setCity(e.target.value)}
-                        className="w-full px-4 py-3.5 pl-10 bg-[#f4f5f7] rounded-[18px] border border-black/5 outline-none focus:border-[#8cabf2] focus:ring-4 focus:ring-[#8cabf2]/15 transition-all text-sm appearance-none cursor-pointer text-[#1f2329]"
+                        className="w-full appearance-none rounded-[18px] border border-black/5 bg-[#f4f5f7] px-4 py-3.5 pl-10 text-sm text-[#1f2329] outline-none transition-all focus:border-[#8cabf2] focus:ring-4 focus:ring-[#8cabf2]/15"
                       >
                         <option value="">选择城市...</option>
                         {availableCities.map(c => (
@@ -139,39 +136,56 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-semibold text-[#8a9099] uppercase tracking-[0.18em] ml-1">详细备注</label>
-                    <textarea 
+                    <label className="ml-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8a9099]">详细备注</label>
+                    <textarea
                       placeholder="记录您的联络细节..."
                       value={note}
                       onChange={e => setNote(e.target.value)}
                       rows={3}
-                      className="w-full px-4 py-3.5 bg-[#f4f5f7] rounded-[18px] border border-black/5 outline-none focus:border-[#8cabf2] focus:ring-4 focus:ring-[#8cabf2]/15 resize-none transition-all text-sm text-[#1f2329]"
+                      className="w-full resize-none rounded-[18px] border border-black/5 bg-[#f4f5f7] px-4 py-3.5 text-sm text-[#1f2329] outline-none transition-all focus:border-[#8cabf2] focus:ring-4 focus:ring-[#8cabf2]/15"
                     />
                   </div>
 
-                  <div className="flex gap-2 pt-2">
-                    <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-3 text-sm font-semibold text-[#8a9099] hover:text-[#1f2329] transition-colors">取消</button>
-                    <button type="submit" className="flex-1 py-3 bg-[#1f2329] text-white rounded-[18px] text-sm font-semibold shadow-[0_14px_28px_rgba(18,24,40,0.18)] active:scale-[0.99] transition-all">保存联络人</button>
+                  <div className="flex gap-2 pt-1">
+                    <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-3 text-sm font-semibold text-[#8a9099] transition-colors hover:text-[#1f2329]">取消</button>
+                    <button type="submit" className="flex-1 rounded-[18px] bg-[#1f2329] py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(15,23,42,0.18)] transition-all active:scale-[0.99]">保存联络人</button>
                   </div>
                 </form>
               ) : (
-                <button 
+                <button
                   onClick={() => setIsAdding(true)}
-                  className="w-full py-4 bg-[#1f2329] text-white rounded-[22px] flex items-center justify-center gap-2 font-semibold hover:bg-black transition-all duration-200 active:scale-[0.99] shadow-[0_18px_30px_rgba(18,24,40,0.18)]"
+                  className="flex w-full items-center justify-center gap-2 rounded-[22px] bg-[#1f2329] py-4 font-semibold text-white shadow-[0_18px_30px_rgba(15,23,42,0.18)] transition-all duration-200 hover:bg-black active:scale-[0.99]"
                 >
                   <Plus className="w-5 h-5" />
                   新增记录
                 </button>
-              )}
-            </section>
-
-            <section className="space-y-4">
-              <div className="text-[10px] font-semibold text-[#8a9099] uppercase tracking-[0.22em] flex justify-between items-center">
-                <span>联络名录 ({contacts.length})</span>
+              )
+            ) : (
+              <div className="rounded-[26px] border border-dashed border-[#d6dbe4] bg-white/52 px-6 py-8 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/82 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+                  <User className="w-8 h-8 text-[#d4d8de]" />
+                </div>
+                <h3 className="text-lg font-semibold tracking-[-0.03em] text-[#1f2329]">等待选择省份</h3>
+                <p className="mt-2 text-sm leading-6 text-[#70757f]">
+                  先从地图中点选一个省份，再在这里创建联系人记录。
+                </p>
               </div>
-              {contacts.length === 0 ? (
-                <div className="py-16 text-center rounded-[28px] border border-white/70 bg-white/45">
-                  <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center mx-auto mb-4 shadow-[0_10px_30px_rgba(18,24,40,0.06)]">
+            )}
+          </section>
+
+          <section className="mt-5 flex min-h-0 flex-1 flex-col">
+            <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8a9099]">
+              <span>联络名录 ({contacts.length})</span>
+            </div>
+
+            <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
+              {!provinceId ? (
+                <div className="flex h-full items-center justify-center rounded-[26px] border border-white/70 bg-white/40 text-sm text-[#9aa0a8]">
+                  当前没有选中的省份
+                </div>
+              ) : contacts.length === 0 ? (
+                <div className="rounded-[26px] border border-white/70 bg-white/45 py-14 text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/80 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
                     <User className="w-8 h-8 text-[#d4d8de]" />
                   </div>
                   <p className="text-sm text-[#7d828c]">该地区暂无联络人记录</p>
@@ -179,7 +193,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               ) : (
                 <div className="space-y-3">
                   {contacts.map(contact => (
-                    <div key={contact.id} className="bg-white/76 p-5 rounded-[24px] border border-white/80 shadow-[0_16px_36px_rgba(18,24,40,0.08)] flex justify-between items-start group hover:translate-y-[-1px] hover:shadow-[0_20px_42px_rgba(18,24,40,0.10)] transition-all duration-300">
+                    <div key={contact.id} className="group flex items-start justify-between rounded-[22px] border border-white/80 bg-white/76 p-5 shadow-[0_16px_36px_rgba(15,23,42,0.08)] transition-all duration-300 hover:translate-y-[-1px] hover:shadow-[0_20px_42px_rgba(15,23,42,0.10)]">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-[#1f2329]">{contact.name}</span>
@@ -205,10 +219,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   ))}
                 </div>
               )}
-            </section>
-          </div>
+            </div>
+          </section>
         </div>
-      )}
+      </div>
     </aside>
   );
 };
