@@ -5,7 +5,7 @@ import { Sidebar } from './components/Sidebar';
 import { StatsCards } from './components/StatsCards';
 import { ContactsState, Contact } from './types';
 import { MapPin } from 'lucide-react';
-import TextRevealByWord from "./components/TextRevealByWord";
+import BrandWordmark from "./components/BrandWordmark";
 
 const PROVINCES_LIST = [
   "北京市", "天津市", "河北省", "山西省", "内蒙古自治区", "辽宁省", "吉林省", "黑龙江省",
@@ -62,14 +62,14 @@ return (
             <div className="flex h-full min-h-0 flex-col gap-4 px-2">
               <div className="z-20 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-6 gap-y-4 px-3 pt-3">
                 <div className="max-w-[520px] self-start pt-2">
-                  <h1 className="text-[31px] font-semibold leading-none tracking-[-0.05em] text-[#1f2329]">
-                    欢迎来到 “城市朋友”
+                  <h1 className="flex items-baseline gap-2 text-[31px] font-semibold leading-none tracking-[-0.05em] text-[#1f2329]">
+                    <span>欢迎来到</span>
+                    <BrandWordmark text="城市朋友" />
                   </h1>
 
-                  <TextRevealByWord
-                    text="以地图为中心记录你的全国联络网"
-                    className="mt-3"
-                  />
+                  <p className="mt-3 text-[20px] font-semibold leading-[1.18] tracking-[-0.03em] text-[#2a2f36]">
+                    以地图为中心记录你的全国联络网
+                  </p>
 
                   <p className="mt-2 text-[15px] leading-7 text-[#70757f]">
                     让人与人的连接重新回到空间之中，让每一座城市都有属于你的故事。
