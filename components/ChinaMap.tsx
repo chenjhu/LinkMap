@@ -49,17 +49,24 @@ export const ChinaMap: React.FC<ChinaMapProps> = ({ onProvinceSelect, selectedPr
     mapInstanceRef.current = map;
     markersLayerRef.current = L.layerGroup().addTo(map);
 
-    fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
-      .then(res => res.json())
-      .then(data => {
-        const filtered = {
-          ...data,
-          features: data.features.filter((f: any) => f.properties.level === 'province' || f.properties.adcode !== 100000)
-        };
-        setGeoData(filtered);
-      })
-      .catch(err => console.error("GeoJSON Loading Error:", err));
-
+  fetch(`${import.meta.env.BASE_URL}100000_full.json`)
+  .then((res) => {
+    if (!res.ok) {
+      throw new Error(`Failed to load GeoJSON: ${res.status}`);
+    }
+    return res.json();
+  })
+  .then((data) => {
+    const filtered = {
+      ...data,
+      features: data.features.filter(
+        (f: any) =>
+          f.properties.level === "province" || f.properties.adcode !== 100000
+      ),
+    };
+    setGeoData(filtered);
+  })
+  .catch((err) => console.error("GeoJSON Loading Error:", err));
     return () => {
       map.remove();
       mapInstanceRef.current = null;
