@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f4f4f1;
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --border: rgba(38, 40, 48, 0.08);
+  --text: #1f2329;
+  --muted: #70757f;
+  --accent: #5b8def;
+  --accent-soft: rgba(91, 141, 239, 0.12);
+  --shadow: 0 18px 50px rgba(18, 24, 40, 0.08);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", sans-serif;
+  background: #f6f6f3;
+  color: var(--text);
+  overflow: hidden;
+  letter-spacing: -0.01em;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: saturate(140%) blur(22px);
+  -webkit-backdrop-filter: saturate(140%) blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.52);
+}
+
+.leaflet-container {
+  background: #f7f9fc !important;
+  border-radius: 34px;
+}
+
+.leaflet-pane,
+.leaflet-control,
+.leaflet-marker-icon,
+.leaflet-tooltip {
+  transition: all 220ms ease;
+}
+
+.leaflet-container:focus,
+.leaflet-container:focus-visible,
+.leaflet-interactive:focus,
+.leaflet-interactive:focus-visible,
+.leaflet-marker-icon:focus,
+.leaflet-marker-icon:focus-visible {
+  outline: none !important;
+}
+
+.leaflet-container svg:focus,
+.leaflet-container path:focus,
+.leaflet-container g:focus {
+  outline: none !important;
+}
+
+.leaflet-control-zoom {
+  border: none !important;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(16, 24, 40, 0.10) !important;
+  border-radius: 16px !important;
+}
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+  border: none !important;
+  color: var(--text) !important;
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  background: rgba(255,255,255,0.92) !important;
+}
+
+.leaflet-control-zoom-in:hover,
+.leaflet-control-zoom-out:hover {
+  background: rgba(255,255,255,1) !important;
+}
+
+.leaflet-control-attribution {
+  background: transparent !important;
+  font-size: 9px !important;
+  opacity: 0.38;
+  color: var(--muted);
+}
+
+@keyframes softPulse {
+  0% { transform: scale(1); opacity: 1; }
+  70% { transform: scale(1.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+.custom-div-icon {
+  background: transparent;
+  border: none;
+}
+
+.marker-pulse {
+  width: 12px;
+  height: 12px;
+  background: rgba(91, 141, 239, 0.12);
+  border-radius: 50%;
+  position: absolute;
+  animation: softPulse 3s infinite;
+}
+
+.marker-core {
+  width: 6px;
+  height: 6px;
+  background: linear-gradient(180deg, #78a6ff 0%, #5e8be6 100%);
+  border: 1.5px solid rgba(255,255,255,0.98);
+  border-radius: 50%;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 0 3px rgba(120, 166, 255, 0.10), 0 4px 10px rgba(44, 84, 164, 0.16);
+}
+
+.province-selected {
+  filter: none;
+}
+
+.apple-tooltip {
+  background: rgba(250, 251, 253, 0.94) !important;
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  border-radius: 14px !important;
+  padding: 9px 12px !important;
+  box-shadow: 0 12px 30px rgba(18, 24, 40, 0.10) !important;
+  color: var(--text) !important;
+  font-family: inherit;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.apple-tooltip:before,
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+  display: none !important;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(117, 123, 135, 0.25);
+  border-radius: 10px;
+}
