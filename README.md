@@ -4,6 +4,18 @@
 
 A map-centered way to remember the people who make places meaningful.
 
+## 数据保存与迁移
+
+LinkMap 默认继续使用浏览器本地存储，并支持 JSON 导入与导出。连接 Supabase 后，登录用户的联系人会同步到云端，并通过数据库行级安全策略按用户隔离。
+
+旧版本的 `huayu-contacts-v2` 数据不会被自动删除或覆盖。用户首次登录且云端为空时，页面会明确提示是否把现有本机联系人迁移到云端；迁移完成后会再次从云端读取并核对联系人 ID。
+
+云端部署需要完成三项配置：
+
+1. 在 Supabase SQL Editor 中执行 `supabase/schema.sql`。
+2. 本地开发时根据 `.env.example` 创建 `.env.local`。
+3. 在 GitHub Actions secrets 中配置 `VITE_SUPABASE_URL` 和 `VITE_SUPABASE_PUBLISHABLE_KEY`。
+
 
 ## 项目缘起
 
@@ -66,5 +78,4 @@ Someone who once shared part of their story with us.
 - 一种仍然存在的可能性  
 
 当你面对新的城市、新的旅程或新的问题时，你不再只是搜索信息，而是能够回到那些真实的人际连接之中。
-
 
